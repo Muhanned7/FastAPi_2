@@ -16,12 +16,10 @@ def create_user(user:schemas.user,db:Session =Depends(get_db)):
     new_user= models.User(**user.dict())
     hashed_password = utils.hash(user.password)
     new_user.password = hashed_password
-    try:
-        db.add(new_user)
+    db.add(new_user)
 
-        db.commit()
-    except Exception as e:
-        print("cannot create User:", e)
+    db.commit()
+    
     db.refresh(new_user)
 
     return new_user

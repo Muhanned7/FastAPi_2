@@ -28,7 +28,7 @@ def get_posts(db:Session =Depends(get_db), get_current_user :int = Depends(oauth
                             models.Post.id).filter(models.Post.Title.
                                                    contains(Search)).limit(limit).offset(skip).all()
     
-    
+    print(posts)
     return  posts
 
 
@@ -53,7 +53,7 @@ def get_posts_ind(id:int, db:Session =Depends(get_db),get_current_user :int = De
     return  posts
 
 
-@router.post("/createposts",status_code=status.HTTP_201_CREATED, response_model=schemas.PostRet)
+@router.post("/createposts",status_code=status.HTTP_201_CREATED, response_model=schemas.Posts)
 def create_post(post:schemas.CreatePost,db:Session =Depends(get_db), get_current_user :int = Depends(oauth.get_current_user)):
     # post = post.dict()
     # print(post)
@@ -88,10 +88,10 @@ def delete_post(id:int, db:Session =Depends(get_db),get_current_user :int = Depe
     post_query = db.query(models.Post).filter(models.Post.id==id)
     post = post_query.first()
     if post is None:
-     raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail=f"Not able to delete ")
+     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Not able to delete ")
     
     if post.owner_id != get_current_user.id:
-        raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail=f"Not Authorized")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Not Authorized")
      
 
     post_query.delete(synchronize_session=False)
@@ -99,7 +99,7 @@ def delete_post(id:int, db:Session =Depends(get_db),get_current_user :int = Depe
     return  {"message": "The posts has been deleted"}
 
 
-@router.put("/update/{id}", response_model=schemas.PostRet)
+@router.put("/update/{id}", response_model=schemas.CreatePost)
 def update_post(id:int, post:schemas.Post , db:Session =Depends(get_db),get_current_user :int = Depends(oauth.get_current_user)):
     # print(post)
     # while True:
@@ -113,8 +113,10 @@ def update_post(id:int, post:schemas.Post , db:Session =Depends(get_db),get_curr
     #         raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail=f"Not able to delete {error}")
     post_query = db.query(models.Post).filter(models.Post.id==id)
     old_post = post_query.first()
+    if old_post.owner_id != get_current_user.id:
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED,detail="Not allowed")
     if post_query.first() is None:
-        raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, 
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
                             detail=f"Not able to delete ")
     
     post_query.update(post.dict(), synchronize_session=False)

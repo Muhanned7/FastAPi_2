@@ -22,16 +22,24 @@ class Ret_user(BaseModel):
     class Config:
         orm_mode =True
 
-class PostRet(Post):
-    id:int
+class Posts(Post):
+    id: int
     created_at: datetime
     owner_id: int
-    owner : Ret_user
+    owner: Ret_user
+
+    class Config:
+        orm_mode = True
+
+
+class PostRet(Post):
+    Posts: Posts
+    Vote: int
     class Config:
         orm_mode =True
 
 class PostVote(BaseModel):
-    Post:PostRet
+    Post:Posts
     Votes:int
     class Config:
         orm_mode =True
