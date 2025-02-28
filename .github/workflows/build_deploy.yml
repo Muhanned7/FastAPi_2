@@ -12,5 +12,12 @@ jobs:
     steps:
       - name: pulling git repo
         uses: actions/checkout@v2
-      - name: say hi to muhanned
-        run: echo "hello Muhanned!!!"
+      - name: python set up
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: update pip
+        run: python -m pip install --upgrade pip
+      - name: install all dependencies
+        run: pip install -r requirements.txt
